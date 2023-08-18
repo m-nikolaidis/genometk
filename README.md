@@ -3,11 +3,12 @@
 This project that was created in my free time to get familiarized with developing
 command line interfaces in Rust and is not supposed to be used for serious projects.
 The Rust programming concepts that were covered in this project were:
-    1. Writing Rust code
-    2. Using external crates
-    3. Creating multi-module applications
-    4. Creating command-line arguments
-    5. Testing
+
+1. Writing Rust code
+2. Using external crates
+3. Creating multi-module applications
+4. Creating command-line arguments
+5. Testing
 
 ## Credit where credit is due
 
