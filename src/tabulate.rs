@@ -11,6 +11,10 @@ fn calculate_gc(g: usize, c: usize) -> usize {
     return g + c;
 }
 
+fn turn_to_perc(gc: usize, length: usize) -> f64 {
+    return (gc as f64 / length as f64) * 100.0;
+}
+
 fn gather_freq(record: &fasta::Record) -> [usize; 5] {
     let mut a = 0;
     let mut t = 0;
@@ -37,11 +41,19 @@ fn gather_freq(record: &fasta::Record) -> [usize; 5] {
     return [a, t, g, c, n];
 }
 
-fn gather_info(record: &fasta::Record) -> (usize, usize, [usize; 5]) {
+fn gather_info(record: &fasta::Record) -> (usize, usize, [usize; 5], [usize; 5]) {
     let length = gather_length(&record);
     let freq = gather_freq(&record);
-    let gc = calculate_gc(freq[2], freq[3]);
-    return (length, gc, freq);
+    let mut gc = calculate_gc(freq[2], freq[3]);
+    gc = turn_to_perc(gc, length) as usize;
+    let perc_freq: [usize; 5] = [
+        turn_to_perc(freq[0], length) as usize,
+        turn_to_perc(freq[1], length) as usize,
+        turn_to_perc(freq[2], length) as usize,
+        turn_to_perc(freq[3], length) as usize,
+        turn_to_perc(freq[4], length) as usize,
+    ];
+    return (length, gc, freq, perc_freq);
 }
 
 pub fn tabulate(inputfile: &str, out_filename: &str) {
@@ -55,7 +67,7 @@ pub fn tabulate(inputfile: &str, out_filename: &str) {
     let mut writer = BufWriter::new(outfile);
 
     // Header
-    writeln!(writer, "ID\tLength\tGC\tA\tT\tG\tC\tN").unwrap();
+    writeln!(writer, "ID\tLength\tGC%\tA\tT\tG\tC\tN\tA%\tT%\tG%\tC%\tN%").unwrap();
 
     // Read input fasta file and write
     let mut records = fasta::Reader::from_file(&inputfile).unwrap().records();
@@ -65,7 +77,7 @@ pub fn tabulate(inputfile: &str, out_filename: &str) {
         let info = gather_info(&record);
         writeln!(
             writer,
-            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
             record.id(),
             info.0,
             info.1,
@@ -74,6 +86,11 @@ pub fn tabulate(inputfile: &str, out_filename: &str) {
             info.2[2],
             info.2[3],
             info.2[4],
+            info.3[0],
+            info.3[1],
+            info.3[2],
+            info.3[3],
+            info.3[4],
         )
         .unwrap();
     }
