@@ -1,4 +1,3 @@
-// use camino::Utf8PathBuf;
 use clap::{arg, Command, ArgGroup};
 mod generate;
 mod tabulate;
@@ -39,6 +38,13 @@ fn cli() -> Command {
     return cmd;
 }
 
+fn check_file_exists(file: &str) -> bool {
+    let path = std::path::Path::new(file);
+    if !path.exists(){
+        return false;
+    }
+    return true;
+}
 
 fn main(){
     let matches = cli().get_matches();
@@ -49,11 +55,23 @@ fn main(){
             let output = subcmd_gen.get_one::<String>("output").unwrap();
             let num_sequences = subcmd_gen.get_one::<i64>("num_sequences").unwrap();
             let mut_rate = subcmd_gen.get_one::<f64>("mut_rate");
+            if check_file_exists(&*output) == true {
+                println!("Output file already exists. Please choose another name");
+                return;
+            }
             generate::generate_sequences(&*output, *seq_len, *num_sequences, mut_rate);
         },
         Some(("tabulate", subcmd_tab)) => {
             let input = subcmd_tab.get_one::<String>("input").unwrap().trim();
             let output = subcmd_tab.get_one::<String>("output").unwrap().trim();
+            if check_file_exists(&*input) == false {
+                println!("Input file does not exist. Please choose another name");
+                return;
+            }
+            if check_file_exists(&*output) == true {
+                println!("Output file already exists. Please choose another name");
+                return;
+            }
             tabulate::tabulate(&input, &output);
         },
         Some(("sample", subcmd_sample)) => {
@@ -61,6 +79,14 @@ fn main(){
             let output = subcmd_sample.get_one::<String>("output").unwrap().trim();
             let num_sequences = subcmd_sample.get_one::<usize>("num_sequences");
             let list_file = subcmd_sample.get_one::<String>("list_file");
+            if check_file_exists(&*input) == false {
+                println!("Input file does not exist. Please choose another name");
+                return;
+            }
+            if check_file_exists(&*output) == true {
+                println!("Output file already exists. Please choose another name");
+                return;
+            }
             match num_sequences {
                 Some(num) => subsample::subsample_sequences(&input, &output, *num),
                 None => (),
