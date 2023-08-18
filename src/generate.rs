@@ -133,7 +133,7 @@ fn test_generate_mut_rate() {
     let outfname = "test3.fasta";
     let seqlen = 10_000;
     let maxseqs = 100;
-    let mut_rate = 1e-5;
+    let mut_rate = 1e-6;
     generate_sequences(outfname, seqlen, maxseqs, Some(&mut_rate));
     let reader = fasta::Reader::from_file(outfname).unwrap();
     let mut count = 0;

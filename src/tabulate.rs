@@ -11,8 +11,8 @@ fn calculate_gc(g: usize, c: usize) -> usize {
     return g + c;
 }
 
-fn turn_to_perc(gc: usize, length: usize) -> f64 {
-    return (gc as f64 / length as f64) * 100.0;
+fn turn_to_perc(element: usize, length: usize) -> f64 {
+    return (element as f64 / length as f64) * 100.0;
 }
 
 fn gather_freq(record: &fasta::Record) -> [usize; 5] {
@@ -94,4 +94,24 @@ pub fn tabulate(inputfile: &str, out_filename: &str) {
         )
         .unwrap();
     }
+}
+
+
+#[test]
+fn test_gather_freq() {
+    let record = fasta::Record::with_attrs("id", None, b"ATTGCN");
+    let freq = gather_freq(&record);
+    assert_eq!(freq, [1, 2, 1, 1, 1]);
+}
+
+#[test]
+fn test_gather_info() {
+    // The testing sequence is of size 10 and has 50% GC content to avoid rounding errors
+    let record = fasta::Record::with_attrs("id", None, b"GGGGGAAAAA");
+    let info = gather_info(&record);
+    println!("{:?}", info);
+    assert_eq!(info.0, 10);
+    assert_eq!(info.1, 50);
+    assert_eq!(info.2, [5, 0, 5, 0, 0]);
+    assert_eq!(info.3, [50, 0, 50, 0, 0]);
 }

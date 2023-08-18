@@ -70,3 +70,38 @@ pub fn subsample_list(input: &str, output: &str, list_file: &str){
         }
     }
 }
+
+#[test]
+fn test_subsample_sequences() {
+    let input = "test_files/test.fasta";
+    let output = "test_files/test_subsample.fasta";
+    let num_sequences = 2;
+    subsample_sequences(&input, &output, num_sequences);
+    let mut records = fasta::Reader::from_file(&output).unwrap().records();
+    let mut counter = 0;
+    while let Some(Ok(_)) = records.next() {
+        counter += 1;
+    }
+    assert_eq!(counter, num_sequences);
+}
+
+#[test]
+fn test_subsample_sequences_more_than_max(){
+    let input = "test_files/test.fasta";
+    let output = "test_files/test_subsample.fasta";
+    let num_sequences = 100;
+    let result = std::panic::catch_unwind(|| subsample_sequences(&input, &output, num_sequences));
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_subsample_list() {
+    let input = "test_files/test.fasta";
+    let output = "test_files/test_subsample_list.fasta";
+    let list_file = "test_files/test_list.txt";
+    subsample_list(&input, &output, &list_file);
+    let records = fasta::Reader::from_file(&output).unwrap().records();
+    let output_records: Vec<String> = records.map(|rec| rec.unwrap().id().to_string()).collect();
+    let desired_records: Vec<String> = vec!["Seq1".to_string(), "Seq3".to_string()];
+    assert_eq!(output_records, desired_records);
+}
